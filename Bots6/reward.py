@@ -54,7 +54,7 @@ class Reward:
         """
         moves the reward to a new random location
         """
-        print("the reward moved")
+        # print("the reward moved")
         self.position[0] = random.random() * (self.x_max - self.x_min) + self.x_min
         self.position[1] = random.random() * (self.y_max - self.y_min) + self.y_min
         self.circleObject.position = self.position
@@ -82,7 +82,7 @@ class Reward:
         if there are no more slices the reward will move and the slices reset
         """
         self.slices -= 1
-        print(str(self.slices) + " slices left")
+        # print(str(self.slices) + " slices left")
         if self.slices <= 0:
             self.move()
             self.slices = MAX_SLICES
@@ -91,7 +91,7 @@ class Reward:
 def main():
     sim = simulator.Simulator()
     fruit = Reward(sim)
-    sim.simObjects.append(fruit)
+    sim.sim_objects.append(fruit)
     sim.run()
 
 

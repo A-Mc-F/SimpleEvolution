@@ -1,11 +1,12 @@
 from __future__ import annotations
 import math
 import random
-import brain
+import neural_net as neural_net
 import visualiser
 import simulator
 import copy
 from visualiser import Display
+import func_lib as fl
 
 
 # bot simulation constants
@@ -64,14 +65,14 @@ class Bot:
         self.dead = False
 
         # bot internal variables
-        self.energy_level = self.attributes.energyReserveLimit
+        self.energy_level = self.attributes.energy_limit
         self.breeding_points = 0
         self.total_rewards_collected = 0
         self.time_since_last_child = 0.0
         self.time_since_last_meal = 0.0
 
         # world variables
-        self.birth_time = copy.copy(self.simulator.simTime)
+        self.birth_time = copy.copy(self.simulator.simulated_duration)
         self.age = 0.0
 
         # bot enviromental variables
@@ -94,29 +95,29 @@ class Bot:
         self.max_view_distance = MAX_VIEW_DISTANCE
         self.eye = Eye(self)
 
-        self.net: brain.Brain = None
+        self.brain: neural_net.Network = None
 
     def connectToBrain(self):
-        self.net.num_of_inputs = 0
-        self.net.num_of_outputs = 0
-        self.net.configureNeurons()
+        self.brain.num_of_inputs = 0
+        self.brain.num_of_outputs = 0
+        self.brain.configureNeurons()
         self.assignBrainInputs()
         self.assignBrainOutputs()
 
     def assignBrainInputs(self):
 
-        self.net.num_of_inputs = 0
+        self.brain.num_of_inputs = 0
 
-        self.net.setInput("EP", self.getEnergyPercent)
-        self.net.setInput("DP", self.getDirectionPercent)
-        self.net.setInput("PPx", self.getPPx)
-        self.net.setInput("PPy", self.getPPy)
+        self.brain.setInput("EP", self.getEnergyPercent)
+        self.brain.setInput("DP", self.getDirectionPercent)
+        self.brain.setInput("PPx", self.getPPx)
+        self.brain.setInput("PPy", self.getPPy)
 
         for segment in self.eye.segments:
-            self.net.setInput(segment.name + "Dis", segment.getDisPercent)
-            self.net.setInput(segment.name + "R", segment.getRed)
-            self.net.setInput(segment.name + "G", segment.getGreen)
-            self.net.setInput(segment.name + "B", segment.getBlue)
+            self.brain.setInput(segment.name + "Dis", segment.getDisPercent)
+            self.brain.setInput(segment.name + "R", segment.getRed)
+            self.brain.setInput(segment.name + "G", segment.getGreen)
+            self.brain.setInput(segment.name + "B", segment.getBlue)
 
     def assignBrainOutputs(self):
         def neuronToFactor(neuron_output_function):
@@ -130,11 +131,11 @@ class Bot:
 
             return convertedValue
 
-        self.net.num_of_outputs = 0
+        self.brain.num_of_outputs = 0
 
-        self.angular_velocity_factor = neuronToFactor(self.net.setOutput("AVF"))
-        self.velocity_factor = neuronToFactor(self.net.setOutput("VF"))
-        self.eat_action = self.net.setOutput("EA")
+        self.angular_velocity_factor = neuronToFactor(self.brain.setOutput("AVF"))
+        self.velocity_factor = neuronToFactor(self.brain.setOutput("VF"))
+        self.eat_action = self.brain.setOutput("EA")
 
     def simulate(self):
         # determine the elapsed time
@@ -151,19 +152,19 @@ class Bot:
         if self.dead:
             print(f"{self.attributes.name} [{self.attributes.colourHEX}] died")
             self.circleVisual.delete()
-            self.simulator.simObjects.remove(self)
+            self.simulator.sim_objects.remove(self)
 
     def calculateInternalVariables(self):
         # how long the bot has been alive
-        self.age += self.simulator.simTimeInterval
+        self.age += self.simulator.simulated_time_step
 
         # updates internal clocks accordingly
-        self.time_since_last_child += self.simulator.simTimeInterval
-        self.time_since_last_meal += self.simulator.simTimeInterval
+        self.time_since_last_child += self.simulator.simulated_time_step
+        self.time_since_last_meal += self.simulator.simulated_time_step
 
     def loopThroughObjects(self):
         self.eye.reset()
-        for object in self.simulator.simObjects:
+        for object in self.simulator.sim_objects:
             if object.attributes.name != self.attributes.name:
                 self.eye.see(object)
                 self.eat(object)
@@ -199,17 +200,17 @@ class Bot:
             and self.time_since_last_meal >= EAT_DELAY
             and self.eat_action() <= 0.8
         ):
-            print(self.attributes.name + " took a nibble")
+            # print(self.attributes.name + " took a nibble")
 
             # adds an energy boost to the energy level upto the maximum energy level
             energy_boost = 30
             self.energy_level += energy_boost
-            if self.energy_level > self.attributes.energyReserveLimit:
-                self.energy_level = self.attributes.energyReserveLimit
+            if self.energy_level > self.attributes.energy_limit:
+                self.energy_level = self.attributes.energy_limit
 
             # makes the bot "age" and have less vitality
-            if self.attributes.energyReserveLimit >= 30:
-                self.attributes.energyReserveLimit -= 2
+            if self.attributes.energy_limit >= 30:
+                self.attributes.energy_limit -= 2
 
             # the rewards for getting a reward
             self.total_rewards_collected += 1
@@ -259,11 +260,12 @@ class Bot:
 
         if "bot" in str.lower(other_bot.attributes.name):
             # check if simulator can accept more bots
-            if len(self.simulator.simObjects) >= self.simulator.maxNumOfObjects:
+            if not self.simulator.canAddObject():
                 return
 
-            # check if not trying to breed with self (eww)
-            if self.attributes.name == other_bot.attributes.name:
+            # check not self
+            if self == other_bot:
+                print("is self")
                 return
 
             # check if this bot is still willing (might not if mated with previous bot)
@@ -278,21 +280,16 @@ class Bot:
             if not self.sameSpecies(other_bot):
                 return
 
-            child_name = "bot" + str(self.simulator.totalNumOfObjects)
+            child_name = f"bot_{self.simulator.object_counter}"
 
             print(
                 f"{self.attributes.name} {self.attributes.colourHEX} mated with {other_bot.attributes.name} {other_bot.attributes.colourHEX} to create {child_name}"
             )
 
-            # reset breeding timers
-            self.time_since_last_child = 0
-            other_bot.time_since_last_child = 0
-            # remove a breeding point
-            self.breeding_points -= 1
-            other_bot.breeding_points -= 1
-            # remove some energy
-            self.energy_level -= ENERGY_LOST_FROM_BREEDING
-            other_bot.energy_level -= ENERGY_LOST_FROM_BREEDING
+            for bot in [self, other_bot]:
+                bot.time_since_last_child = 0  # reset breeding timers
+                bot.breeding_points -= 1  # remove a breeding point
+                bot.energy_level -= ENERGY_LOST_FROM_BREEDING  # remove some energy
 
             # determine whos traits will dominate
             if self.total_rewards_collected > other_bot.total_rewards_collected:
@@ -310,7 +307,7 @@ class Bot:
             childBot.position = domBot.position.copy()
             childBot.attributes.__dict__.update(domBot.attributes.__dict__.copy())
             childBot.circleVisual = Visual(childBot.simulator.worldWindow, childBot)
-            childBot.net = domBot.net.copy()
+            childBot.brain = domBot.brain.copy()
             childBot.eye = Eye(childBot)
 
             childBot.attributes.name = child_name
@@ -322,7 +319,7 @@ class Bot:
             result_colour_RGB = []
             for i in range(3):
                 result_colour_RGB.append(
-                    Combine1(
+                    fl.Combine1(
                         domBot.attributes.colourRGB[i],
                         recBot.attributes.colourRGB[i],
                         0,
@@ -335,21 +332,21 @@ class Bot:
             childBot.circleVisual.changeColour()
 
             i = 0
-            for neuron in childBot.net.neurons:
-                neuron.location[0] = Combine_Wrap(
+            for neuron in childBot.brain.neurons:
+                neuron.location[0] = fl.Combine_Wrap(
                     neuron.location[0],
-                    recBot.net.neurons[i].location[0],
+                    recBot.brain.neurons[i].location[0],
                     0,
-                    childBot.net.side_length,
+                    childBot.brain.side_length,
                 )
-                neuron.location[1] = Combine_Wrap(
+                neuron.location[1] = fl.Combine_Wrap(
                     neuron.location[1],
-                    recBot.net.neurons[i].location[1],
+                    recBot.brain.neurons[i].location[1],
                     0,
-                    childBot.net.side_length,
+                    childBot.brain.side_length,
                 )
-                neuron.output_factor = Combine1(
-                    neuron.output_factor, recBot.net.neurons[i].output_factor, -1, 1
+                neuron.output_factor = fl.Combine1(
+                    neuron.output_factor, recBot.brain.neurons[i].output_factor, -1, 1
                 )
                 i += 1
 
@@ -375,7 +372,7 @@ class Bot:
         self.direction += (
             self.angular_velocity_factor()
             * self.attributes.maxTurnSpeed
-            * self.simulator.simTimeInterval
+            * self.simulator.simulated_time_step
         )
         # limit the angle to be within 2*Pi radians or 360 degrees
         self.direction = self.direction % (2 * math.pi)
@@ -383,7 +380,7 @@ class Bot:
         displacement = (
             self.velocity_factor()
             * self.attributes.maxSpeed
-            * self.simulator.simTimeInterval
+            * self.simulator.simulated_time_step
         )
         # find the displacement along the axis
         x_displacement = math.cos(self.direction) * displacement
@@ -421,40 +418,40 @@ class Bot:
         return self.position[1] / self.simulator.world.height
 
     def think(self):
-        self.net.think()
+        self.brain.think()
 
     def getDirectionPercent(self):
         return (self.direction % math.pi) / math.pi
 
     def calculate_energy(self):
         # how much energy was used
-        movement_energy_consumption = (
+        base_energy_loss = BASE_ENERGY_LOSS_RATE * self.simulator.simulated_time_step
+
+        movement_energy_loss = (
             self.attributes.maxSpeed
             * abs(self.velocity_factor())
             * MOVEMENT_ENERGY_LOSS_RATE
-            * self.simulator.simTimeInterval
+            * self.simulator.simulated_time_step
         )
 
-        base_energy_consumption = BASE_ENERGY_LOSS_RATE * self.simulator.simTimeInterval
-
         # take from resoviour
-        self.energy_level -= movement_energy_consumption + base_energy_consumption
+        self.energy_level -= movement_energy_loss + base_energy_loss
 
         # limits to 0
         self.dead = self.energy_level <= 0
 
         # limits above (shouldnt be possible but is somehow)
-        if self.energy_level > self.attributes.energyReserveLimit:
-            self.energy_level = self.attributes.energyReserveLimit
+        if self.energy_level > self.attributes.energy_limit:
+            self.energy_level = self.attributes.energy_limit
 
     def getEnergyPercent(self):
-        return self.energy_level / self.attributes.energyReserveLimit
+        return self.energy_level / self.attributes.energy_limit
 
     def saveBrain(self, file_location=None):
         if file_location == None:
             file_location = "brains/" + self.attributes.name + "_brain.txt"
 
-        self.net.save(file_location)
+        self.brain.save(file_location)
 
     def copy(self):
         copy_bot = Bot(
@@ -465,9 +462,13 @@ class Bot:
             self.attributes.maxEnergyReserve,
             self.attributes.colourRGB,
         )
-        if self.net != None:
-            copy_bot.net = self.net.copy()
+        if self.brain != None:
+            copy_bot.brain = self.brain.copy()
         return copy_bot
+
+    def mutate(self):
+        self.attributes.mutate()
+        self.brain.mutate()
 
 
 class Visual:
@@ -561,7 +562,7 @@ class Attributes:
         self.colourRGB = colourRGB
         self.assignRGBtoHEX()
         self.maxEnergyReserve = max_energy
-        self.energyReserveLimit = self.maxEnergyReserve
+        self.energy_limit = self.maxEnergyReserve
         self.radius = radius
 
     def save(self, file_location=None):
@@ -636,7 +637,7 @@ class Attributes:
         self.maxSpeed = self.maxSpeed + (random.random() - 0.5) * 0.3
         self.maxTurnSpeed = self.maxTurnSpeed + (random.random() - 0.5) * 0.3
         self.maxEnergyReserve = self.maxEnergyReserve + (random.random() - 0.5) * 0.3
-        self.energyReserveLimit = self.maxEnergyReserve
+        self.energy_limit = self.maxEnergyReserve
 
         new_colours = []
         for i in range(3):
@@ -657,114 +658,6 @@ class Attributes:
 
     def assignHEXtoRGB(self):
         self.colourRGB = visualiser.HEXtoRGB(self.colourHEX)
-
-
-def Combine1(dom_value, sub_value, min_value, max_value):
-    """returns a value close to the dom value towards the sub value
-    The amount of pull the sub has is dictated by the probability that
-    it is on a particular side of the dom value"""
-
-    prob_less = (dom_value - min_value) / (max_value - min_value)
-    sub_pull = 0.003
-    mut_pull = 0.005
-
-    if random.random() <= CHANCE_OF_MUTATION:
-        # mutation occurs
-        difference = ((max_value - min_value) * random.random() + min_value) - dom_value
-        new_val = dom_value + mut_pull * difference
-    else:
-        # combine
-        difference = sub_value - dom_value
-        if sub_value < dom_value:
-            new_val = dom_value + sub_pull * difference * (1.1 - prob_less)
-        else:
-            new_val = dom_value + sub_pull * difference * (prob_less + 0.1)
-
-    return min(max(new_val, min_value), max_value)
-
-
-def Combine2(dom_value, sub_value, min_value, max_value):
-    sub_pull = 0.2
-    mut_pull = 0.5
-
-    midpoint = (max_value - min_value) / 2.0
-
-    mutation_value = (max_value - min_value) * random.random() + min_value
-
-    if random.random() <= CHANCE_OF_MUTATION:
-        # mutation occurs
-        return min(max(dom_value + mut_pull * mutation_value, min_value), max_value)
-    else:
-        # combine
-        difference = sub_value - midpoint
-        return min(max(dom_value + sub_pull * difference, min_value), max_value)
-
-
-def Combine3(dom_value, sub_value, min_value, max_value):
-    """only tries to combine the values if they are within a
-    half length of the range of each other"""
-
-    sub_pull = 0.2
-    mut_pull = 0.5
-
-    if random.random() <= CHANCE_OF_MUTATION:
-        # mutation occurs
-        return min(
-            max(dom_value + mut_pull * (random.random() * 2 - 1), min_value), max_value
-        )
-    else:
-        # combine
-        quater_length = (max_value - min_value) / 2.0
-
-        lower_limit = max(dom_value - quater_length, min_value)
-        upper_limit = min(dom_value + quater_length, max_value)
-
-        lower_length = dom_value - lower_limit
-        upper_length = upper_limit - dom_value
-
-        difference = sub_value - dom_value
-
-        if sub_value < dom_value and sub_value >= lower_limit:
-            movement = difference / lower_length
-        elif sub_value > dom_value and sub_value <= upper_limit:
-            movement = difference / upper_length
-        else:
-            """outside of bounds, no movement"""
-            return dom_value
-
-        return min(max(dom_value + movement * sub_pull, min_value), max_value)
-
-
-def Combine_Wrap(dom_value, sub_value, lower_bound, upper_bound):
-    dom_value = dom_value - lower_bound
-
-    max_range = upper_bound - lower_bound
-    pull_factor = 0.02
-
-    if random.random() <= CHANCE_OF_MUTATION:
-        # mutation occurs
-        sub_value = max_range * random.random()
-    else:
-        sub_value = sub_value - lower_bound
-
-    distance = sub_value - dom_value  # neg if dom greater than sub
-    # is it quicker to wrap around
-    if abs(distance) > max_range / 2:
-        if distance < 0:
-            # Wrap around lower bound
-            distance = max_range - distance
-        else:
-            # Wrap around upper bound
-            distance = distance - max_range
-
-    resulting_value = dom_value + distance * pull_factor
-
-    if resulting_value > max_range:
-        resulting_value = resulting_value - upper_bound
-    elif resulting_value < 0:
-        resulting_value = max_range - resulting_value
-
-    return resulting_value + lower_bound
 
 
 class Eye:

@@ -1,9 +1,10 @@
 import neuron
 import random
 import math
+import func_lib as fl
 
 
-class Brain:
+class Network:
     """Handles all the neurons
     each of the neurons will be placed in a field.
     the result of each neuron will come from it's neighbours
@@ -69,7 +70,7 @@ class Brain:
     def copy(self):
         """returns a copy of the brain
         will not have the inputs or outputs assigned"""
-        new_brain = Brain()
+        new_brain = Network()
 
         new_brain.neurons = [N.copy() for N in self.neurons]
         new_brain.configureNeurons()
@@ -85,6 +86,21 @@ class Brain:
         brainFile.write("~")
         brainFile.close()
 
+    def mutate(self):
+        for neuron in self.neurons:
+            neuron.location[0] = fl.Combine_Wrap(
+                neuron.location[0],
+                neuron.location[0],
+                0,
+                self.side_length,
+            )
+            neuron.location[1] = fl.Combine_Wrap(
+                neuron.location[1],
+                neuron.location[1],
+                0,
+                self.side_length,
+            )
+
 
 def main():
     import brain_vis
@@ -93,7 +109,7 @@ def main():
     visulisers = []
 
     for name in ["alpha_", "beta_", "gamma_", "delta_", "epsilon_", "zeta_"]:
-        brain = Brain()
+        brain = Network()
         brain.save(rf"Bots6\brains\{name}starter_brain.txt")
         vis = brain_vis.BrainDisplay()
         vis.connectBrain(brain)

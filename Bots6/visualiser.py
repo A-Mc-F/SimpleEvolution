@@ -3,7 +3,7 @@ import tkinter as tk
 import world
 
 # Global Variables
-Window_width_pixels = 900
+Window_width_pixels = 750
 
 
 class Display:

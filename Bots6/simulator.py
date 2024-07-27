@@ -1,12 +1,9 @@
-import copy
 import os
 import time
 import visualiser as vis
 import world
-import brain_vis
-import random
-import brain
 import multiprocessing as mp
+import neural_net as nn
 
 
 def split(iter, n):
@@ -51,8 +48,8 @@ TIME_MULTIPLIER = 1.0
 
 # Global Variables
 # World
-WORLD_WIDTH = 200
-WORLD_HEIGHT = 200
+WORLD_WIDTH = 150
+WORLD_HEIGHT = 150
 # Collisions
 ENABLE_COLLISIONS = False
 # Number of bots
@@ -62,83 +59,79 @@ MAX_NUMBER_OF_BOTS = int(
     min(WORLD_WIDTH * WORLD_HEIGHT * BOT_DENSITY, MAX_NUMBER_OF_BOTS)
 )
 
-REWARD_DENSITY = 1.0 / 1500
+REWARD_DENSITY = 1.0 / 1000
 NUMBER_OF_REWARDS = int(WORLD_WIDTH * WORLD_HEIGHT * REWARD_DENSITY)
 
 STARTING_NUMBER_OF_BOTS = int(MAX_NUMBER_OF_BOTS * 0.5)
 
 FRAME_RATE = 24.0
-FRAME_INTERVAL = 1 / FRAME_RATE
+FRAME_INTERVAL = 1.0 / FRAME_RATE
 
 
 class Simulator:
-    def __init__(
-        self, run_time_minutes=MINUTES, sim_time_factor=1.0, world=world.World()
-    ):
-        self.maxRunTime = run_time_minutes * 60
-        self.runTime = 0.0
-        self.simTime = 0.0
-        self.simTimeFactor = sim_time_factor
-        self.maxSimTime = self.maxRunTime * self.simTimeFactor
-        self.simTimeInterval = 0.0
-        self.startTime = 0.0
+    def __init__(self, run_time_minutes=MINUTES, world=world.World()):
+        self.max_run_time_s = run_time_minutes * 60
+        self.real_duration = 0.0
+        self.simulated_duration = 0.0
+        self.real_start_time = 0.0
+        self.simulated_time_step = 0.0
 
         self.world = world
 
-        self.maxNumOfObjects = MAX_NUMBER_OF_BOTS
-        self.minNumOfBots = 2
-        self.simObjects = []
-        self.totalNumOfObjects = 0
-        self.allObjects = []
+        self.object_counter = 0
+        self.sim_objects = []
+        self.all_objects = []
 
         self.worldWindow = vis.Display(self.world)
 
-        self.brainWindow = brain_vis.BrainDisplay()
-
-        self.frameInterval = 1.0 / FRAME_RATE
-
         self.status = False
 
+    def canAddObject(self):
+        if len(self.sim_objects) >= MAX_NUMBER_OF_BOTS:
+            return False
+        return True
+
     def addObject(self, object):
-        if len(self.simObjects) >= self.maxNumOfObjects:
-            print("Cant add any more objects")
+        if not self.canAddObject():
             return
-        self.totalNumOfObjects += 1
-        self.simObjects.append(object)
-        self.allObjects.append(object)
+        self.object_counter += 1
+        self.sim_objects.append(object)
+        self.all_objects.append(object)
 
     def run(self):
-        last_print_time = 0.0
+        last_refresh_point = 0.0
         real_time_interval = 0.0
-        self.startTime = now()
         last_real_time = 0.0
+        self.real_start_time = now()
         self.status = True
         while self.status:
-            self.simTime += self.simTimeInterval
-            real_time_interval = self.runTime - last_real_time
-            last_real_time = self.runTime
-            self.simTimeInterval = min(real_time_interval * self.simTimeFactor, 1.0)
+            self.simulated_duration += self.simulated_time_step
+            real_time_interval = self.real_duration - last_real_time
+            last_real_time = self.real_duration
+            self.simulated_time_step = min(real_time_interval * TIME_MULTIPLIER, 1.0)
 
-            for object in self.simObjects:
+            for object in self.sim_objects:
                 object.simulate()
 
-            if len(self.simObjects) <= 20:
+            if len(self.sim_objects) <= 25 + NUMBER_OF_REWARDS:
+                print("repopulating")
                 import bot
 
                 new_species = bot.Bot(self)
+                new_species.brain = nn.Network()
                 for _ in range(10):
                     new_bot = new_species.copy()
-                    new_bot.attributes.name = f"bot{self.totalNumOfObjects}"
-                    new_bot.net = brain.Brain()
+                    new_bot.attributes.name = f"bot_{self.object_counter}"
+                    new_bot.brain.mutate()
                     new_bot.connectToBrain()
                     self.addObject(new_bot)
 
-            if (self.runTime - last_print_time) >= self.frameInterval:
-                last_print_time = self.runTime
+            if (self.real_duration - last_refresh_point) >= FRAME_INTERVAL:
                 self.worldWindow.update()
+                last_refresh_point = self.real_duration
 
-            self.status = self.runTime < self.maxRunTime and self.status
-            self.runTime = now() - self.startTime
+            self.status = self.real_duration < self.max_run_time_s and self.status
+            self.real_duration = now() - self.real_start_time
         print("The simulation has ended")
 
     def endOfSimulation(self):
@@ -146,7 +139,7 @@ class Simulator:
 
         print("all bots results:")
         bestBots: list[Bot] = []
-        for object in self.allObjects:
+        for object in self.all_objects:
             if "bot" in object.attributes.name:
                 print(
                     object.attributes.name
@@ -232,53 +225,43 @@ def main():
         bots_per_species = 3
 
         plane = world.World(WORLD_WIDTH, WORLD_HEIGHT)
-        simulator = Simulator(10, 1, plane)
+        simulator = Simulator(10, plane)
 
         for _ in range(NUMBER_OF_REWARDS):
             simulator.addObject(reward.Reward(simulator))
 
-        with open("starting_species.txt") as ss:
-            starting_species = ss.read().split(",")
+        if False:
+            with open("starting_species.txt") as ss:
+                starting_species = ss.read().split(",")
 
-        for species_name in starting_species:
-            for i in range(bots_per_species):
-                initial_bot = bot.Bot(simulator)
+            for species_name in starting_species:
+                for i in range(bots_per_species):
+                    initial_bot = bot.Bot(simulator)
 
-                initial_bot.net = brain.Brain(
-                    file_name=rf"brains\{species_name}starter_brain.txt"
-                )
-                initial_bot.attributes.load(
-                    rf"attributes\{species_name}starter_attributes.txt"
-                )
+                    initial_bot.net = neural_net.Network(
+                        file_name=rf"brains\{species_name}starter_brain.txt"
+                    )
+                    initial_bot.attributes.load(
+                        rf"attributes\{species_name}starter_attributes.txt"
+                    )
+                    initial_bot.attributes.generation = 0
 
-                initial_bot.attributes.name = "bot" + str(simulator.totalNumOfObjects)
+                    initial_bot.attributes.name = f"bot_{simulator.object_counter}"
 
-                initial_bot.position[0] = plane.width / 2.0 + plane.width * 0.2 * (
-                    random.random() * 2 - 1
-                )
-                initial_bot.position[1] = plane.height / 2.0 + plane.height * 0.2 * (
-                    random.random() * 2 - 1
-                )
-                initial_bot.direction = 6.28 * random.random()
+                    initial_bot.position[0] = plane.width / 2.0 + plane.width * 0.2 * (
+                        random.random() * 2 - 1
+                    )
+                    initial_bot.position[1] = (
+                        plane.height / 2.0
+                        + plane.height * 0.2 * (random.random() * 2 - 1)
+                    )
+                    initial_bot.direction = 6.28 * random.random()
 
-                if i >= bots_per_species * 0.5:
-                    initial_bot.attributes.mutate()
-                    for neuron in initial_bot.net.neurons:
-                        neuron.location[0] = bot.Combine_Wrap(
-                            neuron.location[0],
-                            neuron.location[0],
-                            0,
-                            initial_bot.net.side_length,
-                        )
-                        neuron.location[1] = bot.Combine_Wrap(
-                            neuron.location[1],
-                            neuron.location[1],
-                            0,
-                            initial_bot.net.side_length,
-                        )
+                    if i >= bots_per_species * 0.5:
+                        initial_bot.mutate()
 
-                initial_bot.connectToBrain()
-                simulator.addObject(initial_bot)
+                    initial_bot.connectToBrain()
+                    simulator.addObject(initial_bot)
 
         print("Simulator starting")
         simulator.run()

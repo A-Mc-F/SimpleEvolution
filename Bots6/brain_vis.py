@@ -1,5 +1,5 @@
 import tkinter as tk
-import brain
+import Bots6.neural_net as neural_net
 import bot
 import math
 import neuron as n
@@ -25,7 +25,7 @@ def valueToNeuronRadius(value):
 class BrainDisplay:
     def __init__(self):
         # keeps a connection to the brain
-        self.connected_brain: brain.Brain = None
+        self.connected_brain: neural_net.Network = None
 
         # work out how much space is required to show all the neurons
         # window should be a square
@@ -134,7 +134,7 @@ class BrainDisplay:
 
     def connectBrain(self, new_brain):
         # keeps a connection to the brain
-        self.connected_brain: brain = new_brain
+        self.connected_brain: neural_net = new_brain
 
         # work out how much space is required to show all the neurons
         # window should be a square
@@ -258,7 +258,7 @@ class BrainDisplay:
         self.window.update()
 
     def createNeuronCircle(
-        self, neuron: brain.neuron.Neuron, fillColour, outlineColour
+        self, neuron: neural_net.neuron.Neuron, fillColour, outlineColour
     ):
         """
         Creates a circle with the centre in the x and y position and a radius
@@ -290,7 +290,7 @@ class BrainDisplay:
 
 
 def main():
-    testbrain = brain.Brain(file_name=r"Bots6\brains\#eb403fstarter_brain.txt")
+    testbrain = neural_net.Network(file_name=r"Bots6\brains\#eb403fstarter_brain.txt")
     window1 = BrainDisplay()
     testbrain.configureNeurons()
 
