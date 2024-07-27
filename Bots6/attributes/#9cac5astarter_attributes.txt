@@ -1,7 +1,0 @@
-Name: bot24
-Generation: 2
-Family History: (N:Bot0 G:0) ~> (N:bot3 G:0) ~> (N:bot1 G:0) ~> (N:bot1 G:0) ~> (N:bot22 G:0) ~> (N:bot44 G:1) ~> (N:bot37 G:1) ~> (N:bot4 G:1) ~> (N:bot4 G:1) ~> (N:bot3 G:1) ~> (N:bot1 G:1) ~> (N:bot0 G:1) ~> (N:bot14 G:1) ~> (N:bot10 G:1) ~> (N:bot24 G:2) ~> (N:bot24 G:2)
-Max Speed: 2.965667300184552
-Max Turn Speed: 1.9290407387016657
-Colour: #9cac5a
-Energy Reserve: 100.05387390002237

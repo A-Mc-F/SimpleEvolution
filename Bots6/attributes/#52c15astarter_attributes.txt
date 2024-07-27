@@ -1,7 +1,0 @@
-Name: bot23
-Generation: 2
-Family History: (N:Bot0 G:0) ~> (N:bot3 G:0) ~> (N:bot1 G:0) ~> (N:bot1 G:0) ~> (N:bot22 G:0) ~> (N:bot44 G:1) ~> (N:bot37 G:1) ~> (N:bot4 G:1) ~> (N:bot4 G:1) ~> (N:bot3 G:1) ~> (N:bot1 G:1) ~> (N:bot0 G:1) ~> (N:bot14 G:1) ~> (N:bot23 G:2) ~> (N:bot23 G:2)
-Max Speed: 3.0451299374897642
-Max Turn Speed: 1.8541880123987182
-Colour: #52c15a
-Energy Reserve: 100.03958883653564

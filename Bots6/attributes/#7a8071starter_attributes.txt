@@ -1,7 +1,0 @@
-Name: bot16
-Generation: 2
-Family History: (N:Bot0 G:0) ~> (N:bot3 G:0) ~> (N:bot1 G:0) ~> (N:bot1 G:0) ~> (N:bot22 G:0) ~> (N:bot44 G:1) ~> (N:bot37 G:1) ~> (N:bot4 G:1) ~> (N:bot4 G:1) ~> (N:bot3 G:1) ~> (N:bot1 G:1) ~> (N:bot0 G:1) ~> (N:bot14 G:1) ~> (N:bot16 G:2) ~> (N:bot16 G:2)
-Max Speed: 3.023373190614773
-Max Turn Speed: 2.0073565710516665
-Colour: #7a8071
-Energy Reserve: 100.16455864159755

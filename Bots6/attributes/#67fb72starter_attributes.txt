@@ -1,7 +1,0 @@
-Name: bot81
-Generation: 4
-Family History: (N:Bot0 G:0) ~> (N:bot3 G:0) ~> (N:bot1 G:0) ~> (N:bot1 G:0) ~> (N:bot22 G:0) ~> (N:bot44 G:1) ~> (N:bot37 G:1) ~> (N:bot4 G:1) ~> (N:bot4 G:1) ~> (N:bot3 G:1) ~> (N:bot1 G:1) ~> (N:bot0 G:1) ~> (N:bot14 G:1) ~> (N:bot3 G:1) ~> (N:bot36 G:2) ~> (N:bot52 G:3) ~> (N:bot81 G:4)
-Max Speed: 2.920753897876202
-Max Turn Speed: 2.0163586249005547
-Colour: #67fb72
-Energy Reserve: 100

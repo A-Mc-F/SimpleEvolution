@@ -1,7 +1,0 @@
-Name: bot7
-Generation: 1
-Family History: (N:Bot0 G:0) ~> (N:bot3 G:0) ~> (N:bot1 G:0) ~> (N:bot1 G:0) ~> (N:bot22 G:0) ~> (N:bot44 G:1) ~> (N:bot37 G:1) ~> (N:bot4 G:1) ~> (N:bot4 G:1) ~> (N:bot3 G:1) ~> (N:bot1 G:1) ~> (N:bot0 G:1) ~> (N:bot14 G:1) ~> (N:bot7 G:1)
-Max Speed: 2.860560896895953
-Max Turn Speed: 1.8575758487638285
-Colour: #5ebc84
-Energy Reserve: 99.97689150023382

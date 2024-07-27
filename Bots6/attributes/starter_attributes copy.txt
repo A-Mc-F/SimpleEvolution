@@ -1,7 +1,0 @@
-Name: bot0
-Generation: 0
-Family History: N:Bot0 G:0|
-Max Speed: 3.0
-Max Turn Speed: 2.0
-Colour: #888888
-Energy Reserve: 100

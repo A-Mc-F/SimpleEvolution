@@ -1,7 +1,0 @@
-Name: bot35
-Generation: 7
-Family History: (N:Bot0 G:0) ~> (N:bot3 G:0) ~> (N:bot1 G:0) ~> (N:bot1 G:0) ~> (N:bot22 G:0) ~> (N:bot44 G:1) ~> (N:bot37 G:1) ~> (N:bot4 G:1) ~> (N:bot4 G:1) ~> (N:bot3 G:1) ~> (N:bot1 G:1) ~> (N:bot0 G:1) ~> (N:bot14 G:1) ~> (N:bot10 G:1) ~> (N:bot5 G:1) ~> (N:bot3 G:1) ~> (N:bot6 G:1) ~> (N:bot23 G:2) ~> (N:bot18 G:2) ~> (N:bot19 G:2) ~> (N:bot24 G:3) ~> (N:bot32 G:4) ~> (N:bot0 G:4) ~> (N:bot23 G:5) ~> (N:bot1 G:5) ~> (N:bot25 G:6) ~> (N:bot7 G:6) ~> (N:bot17 G:6) ~> (N:bot3 G:6) ~> (N:bot32 G:7) ~> (N:bot0 G:7) ~> (N:bot29 G:7) ~> (N:bot40 G:7) ~> (N:bot35 G:7)
-Max Speed: 3.4347099276549278
-Max Turn Speed: 1.4360279682979484
-Colour: #c5ea62
-Energy Reserve: 100.00237832306013

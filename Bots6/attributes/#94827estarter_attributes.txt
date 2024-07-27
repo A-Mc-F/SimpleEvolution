@@ -1,7 +1,0 @@
-Name: bot9
-Generation: 1
-Family History: (N:Bot0 G:0) ~> (N:bot3 G:0) ~> (N:bot1 G:0) ~> (N:bot1 G:0) ~> (N:bot22 G:0) ~> (N:bot44 G:1) ~> (N:bot37 G:1) ~> (N:bot4 G:1) ~> (N:bot4 G:1) ~> (N:bot3 G:1) ~> (N:bot1 G:1) ~> (N:bot0 G:1) ~> (N:bot14 G:1) ~> (N:bot9 G:1)
-Max Speed: 3.1038824278144834
-Max Turn Speed: 1.8311425109539354
-Colour: #94827e
-Energy Reserve: 100.10436511773295

@@ -1,7 +1,0 @@
-Name: bot83
-Generation: 4
-Family History: (N:Bot0 G:0) ~> (N:bot3 G:0) ~> (N:bot1 G:0) ~> (N:bot1 G:0) ~> (N:bot22 G:0) ~> (N:bot44 G:1) ~> (N:bot37 G:1) ~> (N:bot4 G:1) ~> (N:bot4 G:1) ~> (N:bot3 G:1) ~> (N:bot1 G:1) ~> (N:bot0 G:1) ~> (N:bot14 G:1) ~> (N:bot14 G:1) ~> (N:bot51 G:2) ~> (N:bot69 G:3) ~> (N:bot83 G:4)
-Max Speed: 3.0964820464117317
-Max Turn Speed: 2.037541977327784
-Colour: #44ff8c
-Energy Reserve: 100
