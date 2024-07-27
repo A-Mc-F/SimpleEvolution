@@ -1,7 +1,7 @@
-Name: bot53
+Name: bot_71
 Generation: 0
-Family History: ~> (N:bot119 G:0) ~> (N:bot36 G:0) ~> (N:bot53 G:0)
+Family History:  ~> (N:bot_71 G:0)
 Max Speed: 3.0
 Max Turn Speed: 2.0943951023931953
-Colour: #189257
-Energy Reserve: 100.0
+Colour: #b60a65
+Energy Reserve: 100

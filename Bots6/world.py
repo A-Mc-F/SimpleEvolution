@@ -1,9 +1,10 @@
 # Global Variables
 # World
-World_width = 50
-World_height = 40
+WORLD_WIDTH = 50
+WORLD_HEIGHT = 40
+
 
 class World:
-    def __init__(self, world_width = World_width, world_height = World_height):
+    def __init__(self, world_width=WORLD_WIDTH, world_height=WORLD_HEIGHT):
         self.width = world_width
         self.height = world_height

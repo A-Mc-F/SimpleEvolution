@@ -622,3 +622,5 @@ The absolute best was #eb3853 bot bot8 RPM: 2.1760648708791845 Gen: 0 with 18 Ma
 The absolute best was #e04c4d bot bot1 RPM: 1.8226601864518182 Gen: 0 with 11 Max Speed: 3.241791627486921
 The absolute best was #eb3f45 bot bot20 RPM: 2.6181345282999056 Gen: 0 with 22 Max Speed: 3.345503558238447
 The absolute best was #189257 bot bot53 RPM: 3.3621672291949527 Gen: 0 with 21 Max Speed: 3.0
+The absolute best was #d918df bot bot_75 RPM: 3.747284621679623 Gen: 0 with 10 Max Speed: 3.0
+The absolute best was #b60a65 bot bot_71 RPM: 1.6256960812336758 Gen: 0 with 3 Max Speed: 3.0

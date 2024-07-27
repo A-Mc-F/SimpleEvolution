@@ -43,6 +43,7 @@ TOTAL_NUMBER_OF_SIMULATIONS = 1
 HOURS = 0
 MINUTES = 5
 SECONDS = 0
+MAX_RUN_TIME_S = HOURS * 3600 + MINUTES * 60 + SECONDS
 # time frame
 TIME_MULTIPLIER = 1.0
 
@@ -50,17 +51,16 @@ TIME_MULTIPLIER = 1.0
 # World
 WORLD_WIDTH = 150
 WORLD_HEIGHT = 150
+WORLD_AREA = WORLD_WIDTH * WORLD_HEIGHT
 # Collisions
 ENABLE_COLLISIONS = False
 # Number of bots
 BOT_DENSITY = 5.0 / 100
 MAX_NUMBER_OF_BOTS = 100
-MAX_NUMBER_OF_BOTS = int(
-    min(WORLD_WIDTH * WORLD_HEIGHT * BOT_DENSITY, MAX_NUMBER_OF_BOTS)
-)
+MAX_NUMBER_OF_BOTS = int(min(WORLD_AREA * BOT_DENSITY, MAX_NUMBER_OF_BOTS))
 
-REWARD_DENSITY = 1.0 / 1000
-NUMBER_OF_REWARDS = int(WORLD_WIDTH * WORLD_HEIGHT * REWARD_DENSITY)
+REWARD_DENSITY = 1.0 / 800
+NUMBER_OF_REWARDS = int(WORLD_AREA * REWARD_DENSITY)
 
 STARTING_NUMBER_OF_BOTS = int(MAX_NUMBER_OF_BOTS * 0.5)
 
@@ -69,8 +69,7 @@ FRAME_INTERVAL = 1.0 / FRAME_RATE
 
 
 class Simulator:
-    def __init__(self, run_time_minutes=MINUTES, world=world.World()):
-        self.max_run_time_s = run_time_minutes * 60
+    def __init__(self, world=world.World()):
         self.real_duration = 0.0
         self.simulated_duration = 0.0
         self.real_start_time = 0.0
@@ -108,7 +107,7 @@ class Simulator:
             self.simulated_duration += self.simulated_time_step
             real_time_interval = self.real_duration - last_real_time
             last_real_time = self.real_duration
-            self.simulated_time_step = min(real_time_interval * TIME_MULTIPLIER, 1.0)
+            self.simulated_time_step = min(real_time_interval * TIME_MULTIPLIER, 0.25)
 
             for object in self.sim_objects:
                 object.simulate()
@@ -122,7 +121,7 @@ class Simulator:
                 for _ in range(10):
                     new_bot = new_species.copy()
                     new_bot.attributes.name = f"bot_{self.object_counter}"
-                    new_bot.brain.mutate()
+                    new_bot.mutate()
                     new_bot.connectToBrain()
                     self.addObject(new_bot)
 
@@ -130,7 +129,7 @@ class Simulator:
                 self.worldWindow.update()
                 last_refresh_point = self.real_duration
 
-            self.status = self.real_duration < self.max_run_time_s and self.status
+            self.status = self.real_duration < MAX_RUN_TIME_S and self.status
             self.real_duration = now() - self.real_start_time
         print("The simulation has ended")
 
@@ -225,7 +224,7 @@ def main():
         bots_per_species = 3
 
         plane = world.World(WORLD_WIDTH, WORLD_HEIGHT)
-        simulator = Simulator(10, plane)
+        simulator = Simulator(plane)
 
         for _ in range(NUMBER_OF_REWARDS):
             simulator.addObject(reward.Reward(simulator))

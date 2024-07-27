@@ -3,15 +3,15 @@ import tkinter as tk
 import world
 
 # Global Variables
-Window_width_pixels = 750
+WINDOW_WIDTH_P = 700
 
 
 class Display:
     def __init__(self, world=world.World()):
         self.world = world
         # variables
-        self.pixels_per_unit = Window_width_pixels / self.world.width
-        self.window_width_pixels = Window_width_pixels
+        self.pixels_per_unit = WINDOW_WIDTH_P / self.world.width
+        self.window_width_pixels = WINDOW_WIDTH_P
         self.window_height_pixels = self.world.height * self.pixels_per_unit
 
         # Create the main window
