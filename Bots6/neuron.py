@@ -78,10 +78,13 @@ class Neuron:
         self.weights = []
         self.type = "input"
 
-    def convertToExternalOutput(self, name):
+    def convertToExternalOutput(self, name, type):
         self.name = name
         self.type = "output"
-        return self.getValue
+        if type == 0:
+            return self.getValue
+        if type == 1:
+            return self.getValue2
 
     def calculateValue(self):
         """
@@ -109,6 +112,9 @@ class Neuron:
 
     def getValue(self):
         return self.value
+
+    def getValue2(self):
+        return self.value * 2 - 1
 
     def copy(self):
         return Neuron(

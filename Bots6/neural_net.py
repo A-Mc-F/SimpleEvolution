@@ -62,10 +62,10 @@ class Network:
         self.neurons[self.num_of_inputs].convertToExternalInput(name, input_function)
         self.num_of_inputs += 1
 
-    def setOutput(self, name):
+    def setOutput(self, name, type):
         # gets the outputs from the end of the list of neurons
         self.num_of_outputs += 1
-        return self.neurons[-self.num_of_outputs].convertToExternalOutput(name)
+        return self.neurons[-self.num_of_outputs].convertToExternalOutput(name, type)
 
     def copy(self):
         """returns a copy of the brain

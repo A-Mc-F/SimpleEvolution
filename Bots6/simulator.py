@@ -81,7 +81,7 @@ class Simulator:
         self.sim_objects = []
         self.all_objects = []
 
-        self.worldWindow = vis.Display(self.world)
+        self.worldWindow = vis.Display(self)
 
         self.status = False
 
@@ -126,7 +126,7 @@ class Simulator:
                     self.addObject(new_bot)
 
             if (self.real_duration - last_refresh_point) >= FRAME_INTERVAL:
-                self.worldWindow.update()
+                self.worldWindow.updateDisplay()
                 last_refresh_point = self.real_duration
 
             self.status = self.real_duration < MAX_RUN_TIME_S and self.status
@@ -227,7 +227,7 @@ def main():
         simulator = Simulator(plane)
 
         for _ in range(NUMBER_OF_REWARDS):
-            simulator.addObject(reward.Reward(simulator))
+            simulator.addObject(reward.Reward(simulator, f"reward_{_}"))
 
         if False:
             with open("starting_species.txt") as ss:

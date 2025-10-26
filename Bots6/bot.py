@@ -5,7 +5,6 @@ import neural_net as neural_net
 import visualiser
 import simulator
 import copy
-from visualiser import Display
 import func_lib as fl
 
 
@@ -86,9 +85,6 @@ class Bot:
             2 * math.pi * random.random()
         )  # angle from x axis, anti-clockwise, radians
 
-        # bot circle
-        self.circleVisual = Visual(simulator.worldWindow, self)
-
         # eye
         self.resolution_of_eye = EYE_RESOLUTION
         self.FOV_angle = FOV_Angle
@@ -133,9 +129,9 @@ class Bot:
 
         self.brain.num_of_outputs = 0
 
-        self.angular_velocity_factor = neuronToFactor(self.brain.setOutput("AVF"))
-        self.velocity_factor = neuronToFactor(self.brain.setOutput("VF"))
-        self.eat_action = self.brain.setOutput("EA")
+        self.angular_velocity_factor = self.brain.setOutput("AVF", 1)
+        self.velocity_factor = self.brain.setOutput("VF", 1)
+        self.eat_action = self.brain.setOutput("EA", 0)
 
     def simulate(self):
         # determine the elapsed time
@@ -151,7 +147,6 @@ class Bot:
         # if died
         if self.dead:
             print(f"{self.attributes.name} [{self.attributes.colourHEX}] died")
-            self.circleVisual.delete()
             self.simulator.sim_objects.remove(self)
 
     def calculateInternalVariables(self):
@@ -303,10 +298,8 @@ class Bot:
             childBot = Bot(
                 self.simulator, "new_bot", colour_RGB=domBot.attributes.colourRGB
             )
-            childBot.circleVisual.delete()
             childBot.position = domBot.position.copy()
             childBot.attributes.__dict__.update(domBot.attributes.__dict__.copy())
-            childBot.circleVisual = Visual(childBot.simulator.worldWindow, childBot)
             childBot.brain = domBot.brain.copy()
             childBot.eye = Eye(childBot)
 
@@ -409,8 +402,6 @@ class Bot:
             self.energy_level -= BOUNDRY_DAMAGE
             self.position[1] = self.attributes.radius * 2
 
-        self.circleVisual.draw()
-
     def getPPx(self):
         return self.position[0] / self.simulator.world.width
 
@@ -469,79 +460,6 @@ class Bot:
     def mutate(self):
         self.attributes.mutate()
         self.brain.mutate()
-
-
-class Visual:
-    def __init__(self, visualiser: Display, bot: Bot):
-        self.bot = bot
-        self.display = visualiser
-        self.body_circle = None
-        self.eye_circle = None
-
-    def _createVisuals(self):
-        """
-        Creates a circle with the centre in the x and y position and a radius
-        returns the circle object.
-        """
-        r = self.bot.attributes.radius
-        # point 1
-        UL_x = 1
-        UL_y = 1
-        # point 2
-        LR_x = self.display._convertToPixels(r * 2)
-        LR_y = self.display._convertToPixels(r * 2)
-
-        self.body_circle = self.display.canvas.create_oval(
-            UL_x, UL_y, LR_x, LR_y, fill=self.bot.attributes.colourHEX
-        )
-
-        # point 1
-        UL_x = 1
-        UL_y = 1
-        # point 2
-        LR_x = self.display._convertToPixels(r / 2.0)
-        LR_y = self.display._convertToPixels(r / 2.0)
-        self.eye_circle = self.display.canvas.create_oval(
-            UL_x, UL_y, LR_x, LR_y, fill="black", outline="white"
-        )
-
-    def draw(self):
-        """
-        Moves the circle object from the position given,
-        radius is subtracted because the display works from
-        the top left corner
-        """
-        if self.body_circle == None:
-            self._createVisuals()
-
-        pos_x = self.bot.position[0]
-        pos_y = self.bot.position[1]
-        r = self.bot.attributes.radius
-        self.display.canvas.moveto(
-            self.body_circle,
-            self.display._convertToPixels(pos_x - r),
-            self.display._convertToPixels(pos_y - r),
-        )
-        self.display.canvas.moveto(
-            self.eye_circle,
-            self.display._convertToPixels(
-                pos_x + r * math.cos(self.bot.direction) * 0.8
-            ),
-            self.display._convertToPixels(
-                pos_y - r * math.sin(self.bot.direction) * 0.8
-            ),
-        )
-
-    def changeColour(self):
-        self.display.canvas.itemconfig(
-            self.body_circle, fill=self.bot.attributes.colourHEX
-        )
-
-    def delete(self):
-        """
-        removes the object from the view space
-        """
-        self.display.canvas.delete(self.body_circle, self.eye_circle)
 
 
 class Attributes:
@@ -649,9 +567,6 @@ class Attributes:
     def setRGB(self, rgb_array):
         self.colourRGB = rgb_array
         self.assignRGBtoHEX()
-
-    def changeCircleColour(self):
-        self.bot.circleVisual.changeColour()
 
     def assignRGBtoHEX(self):
         self.colourHEX = visualiser.RGBtoHEX(self.colourRGB)

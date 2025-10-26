@@ -1,6 +1,6 @@
+from __future__ import annotations
 import random
 import math
-import visualiser
 import simulator
 
 
@@ -11,37 +11,29 @@ MAX_SLICES = 10
 
 
 class Reward:
-    def __init__(self, simulator: simulator.Simulator):
+    def __init__(self, simulator: simulator.Simulator, name):
         self.simulator = simulator
 
         import bot
 
-        self.attributes = bot.Attributes(self, "reward", 0, 0, COLOUR_RGB, 0, RADIUS)
+        self.attributes = bot.Attributes(self, name, 0, 0, COLOUR_RGB, 0, RADIUS)
 
         self.position = [
             self.simulator.world.width / 2.0,
             self.simulator.world.height / 2.0,
         ]
-        self.radius = RADIUS
         self.slices = MAX_SLICES
 
-        self.x_max = simulator.world.width - (BORDER_WIDTH + self.radius)
-        self.y_max = simulator.world.height - (BORDER_WIDTH + self.radius)
+        self.x_max = simulator.world.width - (BORDER_WIDTH + self.attributes.radius)
+        self.y_max = simulator.world.height - (BORDER_WIDTH + self.attributes.radius)
 
-        self.x_min = BORDER_WIDTH + self.radius
+        self.x_min = BORDER_WIDTH + self.attributes.radius
         self.y_min = self.x_min
 
         self.attributes.colourRGB = COLOUR_RGB
         self.attributes.assignRGBtoHEX()
 
         self.energy_level = 1
-
-        self.circleObject = visualiser.CircleObject(
-            self.simulator.worldWindow,
-            self.attributes.colourHEX,
-            self.position,
-            self.attributes.radius,
-        )
 
         self.dead = False
 
@@ -57,8 +49,6 @@ class Reward:
         # print("the reward moved")
         self.position[0] = random.random() * (self.x_max - self.x_min) + self.x_min
         self.position[1] = random.random() * (self.y_max - self.y_min) + self.y_min
-        self.circleObject.position = self.position
-        self.circleObject.move()
 
     def isNear(self, obj):
         """

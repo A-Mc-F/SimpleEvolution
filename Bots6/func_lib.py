@@ -1,6 +1,7 @@
+from __future__ import annotations
 import random
 
-from bot import CHANCE_OF_MUTATION
+CHANCE_OF_MUTATION = 1.0 / 25.0
 
 
 def Combine1(dom_value, sub_value, min_value, max_value):
