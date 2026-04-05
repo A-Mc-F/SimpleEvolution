@@ -1,3 +1,0 @@
-Name: bot32
-Generation: 2
-Family History: bot1

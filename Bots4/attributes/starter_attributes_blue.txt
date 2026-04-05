@@ -1,5 +1,0 @@
-Name: bot135
-Generation: 36
-Family History: bot50~0|~bot172bot20~1|~bot167bot8~6|~bot177bot8~8|~bot104bot8~9|~bot156bot6~11|~bot50bot4~12|~bot59bot4~13|~bot47bot0~14|~bot42bot8~15|~bot46bot6~16|~bot82bot4~18|~bot56bot2~20|bot48~21|~bot61bot0~22|~bot153bot4~25|~bot53bot6~27|bot101~30|~bot191bot2~31|bot54~32|~bot65bot2~33|~bot42bot0~34|bot47~35|~bot135
-Max Speed: 3.073008224956933
-Max Turn Speed: 2.2372146438604052

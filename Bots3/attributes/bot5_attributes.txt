@@ -1,2 +1,0 @@
-Name: bot5
-Generation: 0

@@ -1,5 +1,0 @@
-Name: bot72
-Generation: 36
-Family History: bot29~0|bot69~2|bot76~3|~bot103~bot3bot1~4|bot102~5|~bot122bot7~7|bot92~8|~bot97bot3~9|bot107~10|~bot153bot5~11|bot63~12|~bot80~bot3~bot1bot1~14|~bot43bot3~15|~bot59bot1~16|~bot50bot5~17|bot49~18|~bot75bot1~19|bot51~21|~bot62bot1~22|~bot53bot5~24|bot57~25|~bot110bot7~27|~bot77bot1~29|~bot73~bot5bot3~32|bot47~33|~bot59bot3~34|bot48~35|~bot72
-Max Speed: 3.421786299885867
-Max Turn Speed: 2.1837758431065275
