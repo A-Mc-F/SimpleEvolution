@@ -3,25 +3,26 @@ import random
 import math
 import func_lib as fl
 
+CHANCE_OF_MUTATION = 0.2
 
-class Network:
+
+class Brain:
     """Handles all the neurons
     each of the neurons will be placed in a field.
     the result of each neuron will come from it's neighbours
     the weights between each neuron will be based on its proximity"""
 
-    def __init__(self, num_of_neurons=81, file_name=None):
+    def __init__(self, num_of_neurons=60, file_name=None):
         self.num_of_inputs = 0
         self.num_of_outputs = 0
-        self.side_length = 0
-        self.num_of_neurons = 0
+        self.num_of_neurons = num_of_neurons
+        self.side_length = math.sqrt(num_of_neurons)
 
         self.neurons: list[neuron.Neuron] = []
 
         if file_name == None:
             # Create Neurons
-            self.side_length = math.sqrt(num_of_neurons)
-            for _ in range(num_of_neurons):
+            for _ in range(self.num_of_neurons):
                 self.neurons.append(self._makeNewNeuron())
 
         else:
@@ -47,8 +48,7 @@ class Network:
     def configureNeurons(self):
         """initialise all the neurons inputs
         will select from surounding Neurons"""
-        self.num_of_neurons = len(self.neurons)
-        self.side_length = math.sqrt(self.num_of_neurons)
+        self.side_length = math.sqrt(len(self.neurons))
         for N in self.neurons:
             N.connectToNeighbours(self.neurons, self.side_length)
 
@@ -70,7 +70,7 @@ class Network:
     def copy(self):
         """returns a copy of the brain
         will not have the inputs or outputs assigned"""
-        new_brain = Network()
+        new_brain = Brain()
 
         new_brain.neurons = [N.copy() for N in self.neurons]
         new_brain.configureNeurons()
@@ -88,39 +88,10 @@ class Network:
 
     def mutate(self):
         for neuron in self.neurons:
-            neuron.location[0] = fl.Combine_Wrap(
-                neuron.location[0],
-                neuron.location[0],
-                0,
-                self.side_length,
-            )
-            neuron.location[1] = fl.Combine_Wrap(
-                neuron.location[1],
-                neuron.location[1],
-                0,
-                self.side_length,
-            )
-
-
-def main():
-    import brain_vis
-
-    brains = []
-    visulisers = []
-
-    for name in ["alpha_", "beta_", "gamma_", "delta_", "epsilon_", "zeta_"]:
-        brain = Network()
-        brain.save(rf"Bots6\brains\{name}starter_brain.txt")
-        vis = brain_vis.BrainDisplay()
-        vis.connectBrain(brain)
-        brains.append(brain)
-        visulisers.append(vis)
-
-    while True:
-        for b, v in zip(brains, visulisers):
-            b.think()
-            v.update()
-
-
-if __name__ == "__main__":
-    main()
+            for loc_axis in neuron.location:
+                loc_axis = fl.combine_wrap(
+                    loc_axis,
+                    fl.try_mutate(loc_axis, 0, self.side_length, CHANCE_OF_MUTATION),
+                    0,
+                    self.side_length,
+                )

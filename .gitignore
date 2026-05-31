@@ -1,2 +1,5 @@
-Bots6/brains/*
-Bots6/attributes/*
+brains*
+attributes*
+__pycache__/*
+record.txt
+starting_species.txt

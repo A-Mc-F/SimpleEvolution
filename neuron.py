@@ -1,6 +1,13 @@
 import json
 import math
 import random
+import copy as cp
+
+MAX_NEURON_CONNECTION_RANGE_SQ = 1.5**2
+MIN_NEURON_CONNECTION_RANGE_SQ = 0.5**2
+
+# the strength of the sigmoid function (initialy 10)
+SIGMOID_MULTIPLIER = 5
 
 
 class Neuron:
@@ -9,30 +16,22 @@ class Neuron:
     """
 
     def __init__(self, name="Blank Neuron", location=[0, 0], output_factor=None):
-
-        self.max_range_of_neuron = 1
-        self.min_range_of_neuron = 0.05
-
-        # the strength of the sigmoid function (initialy 10)
-        self.sigmoid_multiplier = 5
-
         self.name = name
         self.location = location
         self.type = "null"
 
         self.inputs = []
         self.weights = []
+        self.stasis_point = 0.0
 
         # initialise the output of the neuron
         # -1.0 to 1.0; can determine if the output is beneficial or detrimental
-        if output_factor == None:
-            if random.random() > 0.5:
-                self.output_factor = 1.0
-            else:
-                self.output_factor = -1.0
-        else:
-            self.output_factor = output_factor
+        self.output_factor = (
+            output_factor if output_factor != None else random.choice([-1, 1])
+        )
+
         self.value = 0.0
+        self.prior_values = []
 
     def connectToNeighbours(self, neuron_list: list["Neuron"], brain_side_length):
         """
@@ -40,6 +39,8 @@ class Neuron:
         assigns their outputs to this neuron's inputs.
         also calculates their weight based on their distance
         """
+        if self.type == "input":
+            return
 
         def shortest_distance(point1, point2, max_range):
             # Calculate direct distance
@@ -54,23 +55,28 @@ class Neuron:
         # wipes the previously held inputs
         self.inputs = []
         self.weights = []
+        self.stasis_point = 0.0
         for other_neuron in neuron_list:
+            if other_neuron is self:
+                continue
+
             x_dis = shortest_distance(
                 self.location[0], other_neuron.location[0], brain_side_length
             )
             y_dis = shortest_distance(
                 self.location[1], other_neuron.location[1], brain_side_length
             )
-            distance = math.sqrt(x_dis**2 + y_dis**2)
+            distance_SQ = x_dis**2 + y_dis**2
             if (
-                distance <= self.max_range_of_neuron
-                and distance >= self.min_range_of_neuron
+                distance_SQ <= MAX_NEURON_CONNECTION_RANGE_SQ
+                and distance_SQ >= MIN_NEURON_CONNECTION_RANGE_SQ
             ):
-                distance_percent = 1.0 - (distance - self.min_range_of_neuron) / (
-                    self.max_range_of_neuron - self.min_range_of_neuron
-                )
+                distance_percent = 1.0 - (
+                    distance_SQ - MIN_NEURON_CONNECTION_RANGE_SQ
+                ) / (MAX_NEURON_CONNECTION_RANGE_SQ - MIN_NEURON_CONNECTION_RANGE_SQ)
                 self.inputs.append(other_neuron)
                 self.weights.append(distance_percent)
+                self.stasis_point += distance_percent * other_neuron.output_factor
 
     def convertToExternalInput(self, name, input):
         self.name = name
@@ -102,23 +108,31 @@ class Neuron:
                 total += i.getOutput() * w
 
             # the sigmoid function
-            # TF = -1 -> O = 0.0
-            # TF = 0 -> O = 0.5
-            # TF = 1 -> O = 1.0
-            self.value = 1 / (1 + math.e ** (total * self.sigmoid_multiplier))
+            # Input = -1 -> Output = 0.0
+            # Input = 0 -> Output = 0.5
+            # Input = 1 -> Output = 1.0
+            self.value = 1 / (
+                1 + math.e ** (-1 * (total - self.stasis_point) * SIGMOID_MULTIPLIER)
+            )
 
     def getOutput(self):
         return self.value * self.output_factor
 
     def getValue(self):
+        """
+        0 to 1
+        """
         return self.value
 
     def getValue2(self):
+        """-1 to 1"""
         return self.value * 2 - 1
 
     def copy(self):
         return Neuron(
-            name=self.name, location=self.location, output_factor=self.output_factor
+            name=self.name,
+            location=cp.deepcopy(self.location),
+            output_factor=cp.deepcopy(self.output_factor),
         )
 
     def info(self):
